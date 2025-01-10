@@ -38,7 +38,7 @@
 	if (isset($_POST['username'])) {
 		require "fungsi.php";
 		$username = $_POST['username'];
-		$passw = md5($_POST['passw']);
+		$passw = $_POST['passw'];
 		$sql = "select * from user where username='$username' and password='$passw'";
 		$hasil = mysqli_query($koneksi, $sql) or die(mysqli_error($koneksi));
 		$row = mysqli_fetch_assoc($hasil);

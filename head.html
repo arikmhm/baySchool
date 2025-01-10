@@ -4,7 +4,7 @@
   </div>
 
   <div class="menu-items">
-    <a href="homeAdmin.php" class="menu-item active">
+    <a href="homeAdmin.php" class="menu-item">
       <i class="fas fa-home"></i>
       <span>Dashboard</span>
     </a>
@@ -24,3 +24,30 @@
     <p class="made-with">Made with ♥ by Kelompok 1</p>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get all menu items
+    const menuItems = document.querySelectorAll(".menu-item");
+
+    // Get current page URL
+    const currentPath = window.location.pathname;
+
+    // Add active class based on current URL
+    menuItems.forEach((item) => {
+      const href = item.getAttribute("href");
+      if (href && currentPath.includes(href)) {
+        item.classList.add("active");
+      }
+
+      // Add click event listener
+      item.addEventListener("click", function (e) {
+        // Remove active class from all items
+        menuItems.forEach((mi) => mi.classList.remove("active"));
+
+        // Add active class to clicked item
+        this.classList.add("active");
+      });
+    });
+  });
+</script>

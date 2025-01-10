@@ -6,24 +6,34 @@ if (!isset($_SESSION['username'])) {
 }
 require "fungsi.php";
 
-// Hitung total data
-$total_dosen = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM dosen"))['total'];
-$total_matkul = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM matkul"))['total'];
-$total_kultawar = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM kultawar"))['total'];
+// Fetch statistics from database
+$total_siswa = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM students"))['total'];
 
-// Ambil data kultawar terbaru
-$query_latest = "SELECT k.*, m.namamatkul, d.namadosen 
-                FROM kultawar k
-                LEFT JOIN matkul m ON k.idmatkul = m.idmatkul
-                LEFT JOIN dosen d ON k.npp = d.npp
-                ORDER BY k.idkultawar DESC LIMIT 5";
-$latest_kultawar = mysqli_query($koneksi, $query_latest);
+// Get gender statistics
+$gender_stats = mysqli_fetch_assoc(mysqli_query($koneksi, "
+    SELECT 
+        SUM(CASE WHEN gender = 'L' THEN 1 ELSE 0 END) as total_male,
+        SUM(CASE WHEN gender = 'P' THEN 1 ELSE 0 END) as total_female
+    FROM students
+"));
+
+// Get grade distribution
+$grade_query = mysqli_query($koneksi, "SELECT grade, COUNT(*) as count FROM students GROUP BY grade");
+$grade_labels = [];
+$grade_data = [];
+while ($row = mysqli_fetch_assoc($grade_query)) {
+    $grade_labels[] = $row['grade'];
+    $grade_data[] = $row['count'];
+}
+
+// Get latest students
+$latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY created_at DESC LIMIT 5");
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Halaman Home Admin</title>
+    <title>Dashboard Administrator - Bay School</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css">
@@ -33,225 +43,236 @@ $latest_kultawar = mysqli_query($koneksi, $query_latest);
     <script src="bootstrap4/jquery/3.3.1/jquery-3.3.1.js"></script>
     <script src="bootstrap4/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    <!-- FullCalendar Core -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <!-- FullCalendar Locales -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
     
     <style>
-        .card-menu {
-            transition: transform 0.3s;
-            margin-bottom: 20px;
+        :root {
+            --primary-color: #6366F1;
+            --secondary-color: #818CF8;
+            --bg-color: #F3F4F9;
+            --text-color: #1E293B;
         }
-        .card-menu:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
         }
-        .icon-large {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
+
+        .main-content {
+            margin-top: 48px;
+            margin-left: 250px;
+            padding: 2rem;
         }
+
         .stat-card {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
         }
+
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .welcome-section {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 40px 0;
-            margin-bottom: 30px;
-            border-radius: 15px;
+
+        .icon-large {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
         }
-        .latest-section {
-            margin-top: 30px;
-        }
-        .table-latest {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+
         .chart-container {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .dashboard-title {
-            color: #333;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            padding: 10px 0;
-            border-bottom: 2px solid #007bff;
+
+        .card-menu {
+            border: none;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
         }
-        #calendar {
-        width: 100%;
-        min-height: 400px;
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-    }
 
-    .fc-toolbar-title {
-        font-size: 1.2em !important;
-    }
+        .card-menu:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.15);
+        }
 
-    .fc .fc-button {
-        padding: 0.2em 0.4em !important;
-        font-size: 0.9em !important;
-    }
+        .menu-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
 
-    .fc-event {
-        border: none;
-        padding: 2px 5px;
-        margin: 2px 0;
-        cursor: pointer;
-    }
+        .calendar-container {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-    .fc-day-today {
-        background-color: rgba(0, 123, 255, 0.1) !important;
-    }
+        
+
+        .search-group {
+            position: relative;
+        }
+
+        .search-group input {
+            padding-left: 2.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+        }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
     <?php require "head.html"; ?>
-    
 
-   <!-- Navbar -->
-<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow-sm">
-    <div class="container-fluid">
-        <!-- Navbar brand -->
-        <div class="navbar-brand">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand navbar-light bg-white mb-4 shadow-sm py-4">
+        <div class="container-fluid">
             <h1 class="h3 mb-0 text-gray-800">Dashboard Administrator</h1>
-        </div>
-
-        <!-- Topbar Navbar -->
-        <ul class="navbar-nav ml-auto">
-            <!-- Nav Item - Search -->
-            <li class="nav-item">
-                <div class="nav-link">
+            
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
                     <div class="search-group">
                         <input type="text" class="form-control" placeholder="Search...">
                         <i class="fas fa-search search-icon"></i>
                     </div>
                 </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#"><i class="fas fa-bell"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user"></i></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-            <!-- Nav Item - Notifications -->
-            <li class="nav-item mx-3">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-bell"></i>
-                </a>
-            </li>
+    <div class="main-content">
+        <!-- Statistics Cards -->
+        <div class="row mb-4 mt-4">
+            <div class="col-md-3">
+                <div class="stat-card p-4">
+                    <div class="text-center">
+                        <i class="fas fa-user-graduate text-primary icon-large"></i>
+                        <h3><?php echo $total_siswa; ?></h3>
+                        <p class="text-muted mb-0">Total Siswa</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card p-4">
+                    <div class="text-center">
+                        <i class="fas fa-male text-success icon-large"></i>
+                        <h3><?php echo $gender_stats['total_male']; ?></h3>
+                        <p class="text-muted mb-0">Siswa Laki-laki</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card p-4">
+                    <div class="text-center">
+                        <i class="fas fa-female text-info icon-large"></i>
+                        <h3><?php echo $gender_stats['total_female']; ?></h3>
+                        <p class="text-muted mb-0">Siswa Perempuan</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card p-4">
+                    <div class="text-center">
+                        <i class="fas fa-chalkboard text-warning icon-large"></i>
+                        <h3><?php echo count($grade_labels); ?></h3>
+                        <p class="text-muted mb-0">Total Kelas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Nav Item - User -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-user"></i>
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="chart-container">
+                    <h5 class="card-title mb-4">Distribusi Siswa per Kelas</h5>
+                    <canvas id="gradeDistributionChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5 class="card-title mb-4">Rasio Gender</h5>
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
 
-<div class="container mt-4" >
-        
-
-         <!-- Statistics Card -->
-         <div class="row mb-4 mt-4">
-            <div class="col-md-12">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <i class="fas fa-user-graduate text-primary icon-large"></i>
-                                    <h3 class="mt-2">932</h3>
-                                    <p class="text-muted">Total Siswa</p>
+        <!-- Calendar and Recent Activity -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="calendar-container">
+                    <h5 class="card-title mb-4">Kalender Akademik</h5>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5 class="card-title mb-4">Siswa Terbaru</h5>
+                    <div class="recent-students">
+                        <?php while($student = mysqli_fetch_assoc($latest_students)) : ?>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar bg-light rounded-circle p-2 mr-3">
+                                    <?php echo substr($student['name'], 0, 1); ?>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0"><?php echo $student['name']; ?></h6>
+                                    <small class="text-muted"><?php echo $student['grade']; ?></small>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-
-        <!-- Chart Section -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Performa Siswa</h5>
-                        <div class="chart-container" style="position: relative; height:400px;">
-                            <canvas id="performanceChart"></canvas>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Calendar and Bar Chart Section -->
-        <div class="row mb-4">
-            <!-- Calendar -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Kalender Akademik</h5>
-                    <div id="calendar" style="background: white; padding: 15px; border-radius: 8px;"></div>
-                </div>
-            </div>
-        </div>
-            <!-- Bar Chart -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Statistik Performa Semester</h5>
-                        <div class="chart-container" style="position: relative; height:400px;">
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Menu Section -->
-        <div class="row mb-4">
+        <!-- Quick Access Menu -->
+        <div class="row">
             <div class="col-md-4">
                 <div class="card card-menu">
-                    <div class="card-body text-center">
-                        <i class="fas fa-user-tie text-primary icon-large"></i>
-                        <h5 class="card-title">Kelola Dosen</h5>
-                        <p class="card-text">Tambah, edit, dan hapus data dosen</p>
-                        <a href="ajaxUpdateDsn.php" class="btn btn-primary">Akses</a>
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-user-graduate text-primary menu-icon"></i>
+                        <h5 class="card-title">Kelola Siswa</h5>
+                        <p class="card-text">Manajemen data dan informasi siswa</p>
+                        <a href="ajaxUpdateMhs.php" class="btn btn-primary">Akses</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card card-menu">
-                    <div class="card-body text-center">
-                        <i class="fas fa-book text-success icon-large"></i>
-                        <h5 class="card-title">Kelola Mata Kuliah</h5>
-                        <p class="card-text">Tambah, edit, dan hapus mata kuliah</p>
-                        <a href="ajaxUpdateMatkul.php" class="btn btn-success">Akses</a>
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-chalkboard-teacher text-success menu-icon"></i>
+                        <h5 class="card-title">Kelola Guru</h5>
+                        <p class="card-text">Manajemen data dan informasi guru</p>
+                        <a href="ajaxUpdateGuru.php" class="btn btn-success">Akses</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card card-menu">
-                    <div class="card-body text-center">
-                        <i class="fas fa-chalkboard-teacher text-info icon-large"></i>
-                        <h5 class="card-title">Kelola Kuliah Tawar</h5>
-                        <p class="card-text">Atur penawaran mata kuliah</p>
-                        <a href="ajaxUpdateKultawar.php" class="btn btn-info">Akses</a>
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-book text-info menu-icon"></i>
+                        <h5 class="card-title">Kelola Mapel</h5>
+                        <p class="card-text">Manajemen mata pelajaran</p>
+                        <a href="ajaxUpdateMapel.php" class="btn btn-info">Akses</a>
                     </div>
                 </div>
             </div>
@@ -259,137 +280,97 @@ $latest_kultawar = mysqli_query($koneksi, $query_latest);
     </div>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Line Chart
-    var ctxLine = document.getElementById('performanceChart').getContext('2d');
-    var dataLine = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-            {
-                label: 'Semester 1',
-                data: [75, 68, 80, 75, 65, 70, 85, 80, 75, 70, 85, 80],
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                tension: 0.4,
-                fill: true
+    document.addEventListener('DOMContentLoaded', function() {
+        // Grade Distribution Chart
+        const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+        new Chart(gradeCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($grade_labels); ?>,
+                datasets: [{
+                    label: 'Jumlah Siswa',
+                    data: <?php echo json_encode($grade_data); ?>,
+                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1
+                }]
             },
-            {
-                label: 'Semester 2',
-                data: [65, 70, 75, 80, 70, 75, 80, 85, 80, 75, 90, 85],
-                borderColor: '#ffc107',
-                backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                tension: 0.4,
-                fill: true
-            }
-        ]
-    };
-
-    new Chart(ctxLine, {
-        type: 'line',
-        data: dataLine,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: { stepSize: 20 }
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
                 }
-            },
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
             }
-        }
-    });
+        });
 
-    // Bar Chart
-    var ctxBar = document.getElementById('barChart').getContext('2d');
-    var dataBar = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-            {
-                label: 'Semester 1',
-                data: [75, 68, 80, 75, 65, 70, 85, 80, 75, 70, 85, 80],
-                backgroundColor: 'rgba(0, 123, 255, 0.7)',
+        // Gender Distribution Chart
+        const genderCtx = document.getElementById('genderChart').getContext('2d');
+        new Chart(genderCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Laki-laki', 'Perempuan'],
+                datasets: [{
+                    data: [
+                        <?php echo $gender_stats['total_male']; ?>,
+                        <?php echo $gender_stats['total_female']; ?>
+                    ],
+                    backgroundColor: [
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(244, 114, 182, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(244, 114, 182, 1)'
+                    ],
+                    borderWidth: 1
+                }]
             },
-            {
-                label: 'Semester 2',
-                data: [65, 70, 75, 80, 70, 75, 80, 85, 80, 75, 90, 85],
-                backgroundColor: 'rgba(255, 193, 7, 0.7)',
-            }
-        ]
-    };
-
-    new Chart(ctxBar, {
-        type: 'bar',
-        data: dataBar,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: { stepSize: 20 }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
-            },
-            plugins: {
-                legend: { position: 'top' }
             }
-        }
-    });
+        });
 
-    // Calendar
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        height: '400px',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth'
-        },
-        buttonText: {
-            today: 'Hari Ini'
-        },
-        events: [
-            {
-                title: 'UTS Semester Ganjil',
-                start: '2025-01-15',
-                end: '2025-01-20',
-                backgroundColor: '#007bff',
-                borderColor: '#007bff'
+        // Calendar
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth'
             },
-            {
-                title: 'UAS Semester Ganjil',
-                start: '2025-01-25',
-                end: '2025-01-30',
-                backgroundColor: '#28a745',
-                borderColor: '#28a745'
-            },
-            {
-                title: 'Libur Semester',
-                start: '2025-02-01',
-                end: '2025-02-14',
-                backgroundColor: '#ffc107',
-                borderColor: '#ffc107'
-            },
-            {
-                title: 'Awal Perkuliahan',
-                start: '2025-02-15',
-                backgroundColor: '#17a2b8',
-                borderColor: '#17a2b8'
-            }
-        ],
-        locale: 'id',
-        firstDay: 1,
-        displayEventTime: false,
-        eventDisplay: 'block'
+            events: [
+                {
+                    title: 'Ujian Tengah Semester',
+                    start: '2025-01-15',
+                    end: '2025-01-20',
+                    backgroundColor: '#6366F1'
+                },
+                {
+                    title: 'Ujian Akhir Semester',
+                    start: '2025-01-25',
+                    end: '2025-01-30',
+                    backgroundColor: '#818CF8'
+                },
+                {
+                    title: 'Libur Semester',
+                    start: '2025-02-01',
+                    end: '2025-02-14',
+                    backgroundColor: '#C7D2FE'
+                }
+            ],
+            height: 450
+        });
+        calendar.render();
     });
-    calendar.render();
-});
-</script>
+    </script>
 </body>
 </html>

@@ -7,7 +7,7 @@
   left: 0;
   background-color: #4d44b5;
   overflow-x: hidden;
-  padding: 20px 0;
+  padding-top: 20px;
   color: white;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .menu-items {
-  padding: 0 12px;
+  padding-left: 24px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -44,9 +44,9 @@
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 20px 0 0 20px;
   transition: all 0.3s ease;
 }
 
@@ -60,19 +60,17 @@
   font-size: 14px;
 }
 
-.menu-item:hover,
-.menu-item.active {
+.menu-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: #ffffff;
+}
+.menu-item.active {
+  background-color: rgba(255, 255, 255);
+  color: #4d44b5;
 }
 
 .logout-button {
   margin-top: 20px;
-}
-
-.logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
 }
 
 .sidebar-footer {
@@ -174,6 +172,7 @@
   margin-left: 265px !important;
   width: calc(100% - 280px) !important;
   max-width: none;
+  background-color: #f3f4ff;
 }
 
 /* Remove dashboard title from container since it's in navbar */
