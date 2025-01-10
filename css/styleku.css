@@ -1,0 +1,199 @@
+.menusamping {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #4d44b5;
+  overflow-x: hidden;
+  padding: 20px 0;
+  color: white;
+}
+
+.logo-section {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sidebar-logo {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.menu-items {
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.menu-item i {
+  width: 20px;
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.menu-item span {
+  font-size: 14px;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.logout-button {
+  margin-top: 20px;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.made-with {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.utama {
+  margin-left: 250px;
+  padding: 20px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .menusamping {
+    width: 80px;
+  }
+
+  .logo-section {
+    justify-content: center;
+    padding: 20px 10px;
+  }
+
+  .logo-text,
+  .menu-item span,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .menu-item {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .menu-item i {
+    margin: 0;
+  }
+
+  .utama {
+    margin-left: 80px;
+  }
+}
+
+/* Navbar Styles */
+.navbar {
+  position: fixed;
+  width: calc(100% - 250px);
+  right: 0;
+  top: 0;
+  z-index: 1000;
+  padding: 0.75rem 1.5rem;
+  margin-left: 250px;
+}
+
+.navbar-brand h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.search-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-group input {
+  padding-right: 30px;
+  width: 200px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  color: #6c757d;
+}
+
+.nav-item .nav-link {
+  color: #6c757d;
+}
+
+.nav-item .nav-link:hover {
+  color: #4a3aff;
+}
+
+/* Adjust main container for fixed navbar */
+.container {
+  margin-top: 6rem !important;
+  margin-left: 265px !important;
+  width: calc(100% - 280px) !important;
+  max-width: none;
+}
+
+/* Remove dashboard title from container since it's in navbar */
+.dashboard-title {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar {
+    width: calc(100% - 80px);
+    margin-left: 80px;
+  }
+
+  .container {
+    margin-left: 95px !important;
+    width: calc(100% - 110px) !important;
+  }
+
+  .search-group input {
+    width: 150px;
+  }
+}
