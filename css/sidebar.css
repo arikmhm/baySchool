@@ -64,6 +64,7 @@
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
+
 .menu-item.active {
   background-color: rgba(255, 255, 255);
   color: #4d44b5;
@@ -122,62 +123,6 @@
   .utama {
     margin-left: 80px;
   }
-}
-
-/* Navbar Styles */
-.navbar {
-  position: fixed;
-  width: calc(100% - 250px);
-  right: 0;
-  top: 0;
-  z-index: 1000;
-  padding: 0.75rem 1.5rem;
-  margin-left: 250px;
-}
-
-.navbar-brand h1 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.search-group {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-group input {
-  padding-right: 30px;
-  width: 200px;
-}
-
-.search-icon {
-  position: absolute;
-  right: 10px;
-  color: #6c757d;
-}
-
-.nav-item .nav-link {
-  color: #6c757d;
-}
-
-.nav-item .nav-link:hover {
-  color: #4a3aff;
-}
-
-/* Adjust main container for fixed navbar */
-.container {
-  margin-top: 6rem !important;
-  margin-left: 265px !important;
-  width: calc(100% - 280px) !important;
-  max-width: none;
-  background-color: #f3f4ff;
-}
-
-/* Remove dashboard title from container since it's in navbar */
-.dashboard-title {
-  display: none;
 }
 
 /* Responsive adjustments */

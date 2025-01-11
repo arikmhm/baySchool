@@ -68,7 +68,7 @@ if ($hasil->num_rows > 0) {
                             '</span>
                         </td>
                         <td>
-                            <a href="editStudent.php?id=' . $row["id"] . '" 
+                            <a href="edit.php?id=' . $row["id"] . '" 
                                class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-edit"></i>
                             </a>

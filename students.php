@@ -12,30 +12,21 @@ if (!isset($_SESSION['username'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="css/styleku.css">
+
+    <link rel="stylesheet" type="text/css" href="css/sidebar.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/page.css">
+
+    
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
     <script src="bootstrap4/jquery/3.3.1/jquery-3.3.1.js"></script>
     <script src="bootstrap4/js/bootstrap.js"></script>
     
     <style>
-        :root {
-            --primary-color: #6366F1;
-            --bg-color: #F3F4F9;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-        }
-
         .page-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: right;
             align-items: center;
             margin-bottom: 2rem;
         }
@@ -130,100 +121,39 @@ if (!isset($_SESSION['username'])) {
             background-color: var(--primary-color);
             color: white;
         }
-
-        .alert {
-            border-radius: 0.5rem;
-        }
     </style>
 
-    <script>
-    $(document).ready(function () {
-        const $result = $('#result');
-        const $feedback = $('#feedback');
-        const $search = $('#search');
-        let timer;
-
-        function loadData(page = 1, query = '') {
-            $.ajax({
-                url: 'getMhs.php',
-                method: 'POST',
-                data: { page: page, search: query },
-                success: function (response) {
-                    $result.html(response);
-                },
-                error: function () {
-                    showFeedback('error', 'Failed to load student data.');
-                }
-            });
-        }
-
-        function showFeedback(type, message) {
-            $feedback
-                .removeClass('alert-success alert-danger')
-                .addClass(type === 'success' ? 'alert-success' : 'alert-danger')
-                .text(message)
-                .show();
-
-            setTimeout(() => $feedback.fadeOut(), 2000);
-        }
-
-        loadData();
-
-        $search.keyup(function () {
-            clearTimeout(timer);
-            const query = $(this).val();
-            timer = setTimeout(() => loadData(1, query), 500);
-        });
-
-        $(document).on('click', '.page-link', function (e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            const query = $search.val(); 
-            loadData(page, query);
-        });
-
-        $(document).on('click', '.btn-delete', function (e) {
-            e.preventDefault();
-            const id = $(this).data('id');
-            const row = $(this).closest('tr');
-
-            if (confirm('Are you sure you want to delete this student?')) {
-                $.ajax({
-                    url: 'deleteStudent.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: { id: id },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            showFeedback('success', response.message);
-                            row.remove();
-                        } else {
-                            showFeedback('error', response.message);
-                        }
-                    },
-                    error: function () {
-                        showFeedback('error', 'Error occurred while deleting.');
-                    }
-                });
-            }
-        });
-    });
-    </script>
+    <script src="js/script.js"></script>
 </head>
 <body>
-    <?php require "head.html"; ?>
-    
+    <?php require "sidebar.html"; ?>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand navbar-light bg-white shadow-sm py-4">
+        <div class="container-fluid">
+            <h1 class="h3 mb-0 text-gray-800">Add New Student</h1>
+            
+            <ul class="navbar-nav ml-auto">
+                
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#"><i class="fas fa-bell"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user"></i></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Page-header -->
     <div class="main-content">
         <div class="page-header">
-            <h2>Students Management</h2>
-            
             <div class="d-flex align-items-center gap-4">
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="search" class="search-input" placeholder="Search students..." autofocus>
                 </div>
                 
-                <a href="addStudent.php" class="btn-add">
+                <a href="add.php" class="btn-add">
                     <i class="fas fa-plus"></i>
                     New Student
                 </a>
@@ -233,5 +163,6 @@ if (!isset($_SESSION['username'])) {
         <div id="feedback" class="alert" style="display:none;"></div>
         <div id="result"></div>
     </div>
+
 </body>
 </html>

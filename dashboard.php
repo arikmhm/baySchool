@@ -37,9 +37,17 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="css/styleku.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
+    <link rel="stylesheet" type="text/css" href="css/sidebar.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/page.css">
+
+    <script src="js/script.js"></script>
+
+
+
     <script src="bootstrap4/jquery/3.3.1/jquery-3.3.1.js"></script>
     <script src="bootstrap4/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,23 +55,7 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     
     <style>
-        :root {
-            --primary-color: #6366F1;
-            --secondary-color: #818CF8;
-            --bg-color: #F3F4F9;
-            --text-color: #1E293B;
-        }
 
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .main-content {
-            margin-top: 48px;
-            margin-left: 250px;
-            padding: 2rem;
-        }
 
         .stat-card {
             background: white;
@@ -115,27 +107,12 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
 
         
 
-        .search-group {
-            position: relative;
-        }
-
-        .search-group input {
-            padding-left: 2.5rem;
-            border-radius: 0.5rem;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94A3B8;
-        }
+        
     </style>
 </head>
 
 <body>
-    <?php require "head.html"; ?>
+    <?php require "sidebar.html"; ?>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand navbar-light bg-white mb-4 shadow-sm py-4">
@@ -252,7 +229,7 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
                         <i class="fas fa-user-graduate text-primary menu-icon"></i>
                         <h5 class="card-title">Kelola Siswa</h5>
                         <p class="card-text">Manajemen data dan informasi siswa</p>
-                        <a href="ajaxUpdateMhs.php" class="btn btn-primary">Akses</a>
+                        <a href="students.php" class="btn btn-primary">Akses</a>
                     </div>
                 </div>
             </div>
@@ -262,7 +239,7 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
                         <i class="fas fa-chalkboard-teacher text-success menu-icon"></i>
                         <h5 class="card-title">Kelola Guru</h5>
                         <p class="card-text">Manajemen data dan informasi guru</p>
-                        <a href="ajaxUpdateGuru.php" class="btn btn-success">Akses</a>
+                        <a href="#" class="btn btn-success">Akses</a>
                     </div>
                 </div>
             </div>
@@ -272,105 +249,106 @@ $latest_students = mysqli_query($koneksi, "SELECT * FROM students ORDER BY creat
                         <i class="fas fa-book text-info menu-icon"></i>
                         <h5 class="card-title">Kelola Mapel</h5>
                         <p class="card-text">Manajemen mata pelajaran</p>
-                        <a href="ajaxUpdateMapel.php" class="btn btn-info">Akses</a>
+                        <a href="#" class="btn btn-info">Akses</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Grade Distribution Chart
-        const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
-        new Chart(gradeCtx, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($grade_labels); ?>,
-                datasets: [{
-                    label: 'Jumlah Siswa',
-                    data: <?php echo json_encode($grade_data); ?>,
-                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                    borderColor: 'rgba(99, 102, 241, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 }
-                    }
+    // Grade Distribution Chart
+    const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+    new Chart(gradeCtx, {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($grade_labels); ?>,
+            datasets: [{
+                label: 'Jumlah Siswa',
+                data: <?php echo json_encode($grade_data); ?>,
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
                 }
             }
-        });
-
-        // Gender Distribution Chart
-        const genderCtx = document.getElementById('genderChart').getContext('2d');
-        new Chart(genderCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Laki-laki', 'Perempuan'],
-                datasets: [{
-                    data: [
-                        <?php echo $gender_stats['total_male']; ?>,
-                        <?php echo $gender_stats['total_female']; ?>
-                    ],
-                    backgroundColor: [
-                        'rgba(99, 102, 241, 0.8)',
-                        'rgba(244, 114, 182, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(99, 102, 241, 1)',
-                        'rgba(244, 114, 182, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-
-        // Calendar
-        const calendarEl = document.getElementById('calendar');
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth'
-            },
-            events: [
-                {
-                    title: 'Ujian Tengah Semester',
-                    start: '2025-01-15',
-                    end: '2025-01-20',
-                    backgroundColor: '#6366F1'
-                },
-                {
-                    title: 'Ujian Akhir Semester',
-                    start: '2025-01-25',
-                    end: '2025-01-30',
-                    backgroundColor: '#818CF8'
-                },
-                {
-                    title: 'Libur Semester',
-                    start: '2025-02-01',
-                    end: '2025-02-14',
-                    backgroundColor: '#C7D2FE'
-                }
-            ],
-            height: 450
-        });
-        calendar.render();
+        }
     });
+
+    // Gender Distribution Chart
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    new Chart(genderCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Laki-laki', 'Perempuan'],
+            datasets: [{
+                data: [
+                    <?php echo $gender_stats['total_male']; ?>,
+                    <?php echo $gender_stats['total_female']; ?>
+                ],
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(244, 114, 182, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(99, 102, 241, 1)',
+                    'rgba(244, 114, 182, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Calendar
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth'
+        },
+        events: [
+            {
+                title: 'Ujian Tengah Semester',
+                start: '2025-01-15',
+                end: '2025-01-20',
+                backgroundColor: '#6366F1'
+            },
+            {
+                title: 'Ujian Akhir Semester',
+                start: '2025-01-25',
+                end: '2025-01-30',
+                backgroundColor: '#818CF8'
+            },
+            {
+                title: 'Libur Semester',
+                start: '2025-02-01',
+                end: '2025-02-14',
+                backgroundColor: '#C7D2FE'
+            }
+        ],
+        height: 450
+    });
+    calendar.render();
+});
     </script>
 </body>
 </html>

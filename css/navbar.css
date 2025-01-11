@@ -1,0 +1,19 @@
+.search-group {
+  position: relative;
+}
+
+.search-group input {
+  padding-left: 2.5rem;
+  border-radius: 0.5rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+.navbar {
+  margin-left: 250px;
+}
